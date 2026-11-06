@@ -1,5 +1,6 @@
 package br.com.easyshop.ui.products
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +15,9 @@ import br.com.easyshop.data.nosql.Product
 import br.com.easyshop.domain.ProductService
 import br.com.easyshop.domain.ValidationException
 import br.com.easyshop.ui.FormMessage
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -35,6 +38,11 @@ class ProductViewModel(private val service: ProductService) : ViewModel() {
     private var nextRowId = 0L
 
     val products: StateFlow<List<Product>> = service.observeProducts()
+        .catch { e ->
+            Log.e(TAG, "Erro ao carregar produtos", e)
+            message = FormMessage("Não foi possível carregar os produtos.", true)
+            emit(emptyList())
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun addAttributeRow() {
@@ -70,18 +78,32 @@ class ProductViewModel(private val service: ProductService) : ViewModel() {
                 )
             } catch (e: ValidationException) {
                 message = FormMessage(e.message ?: "Erro de validação.", true)
+            } catch (e: CancellationException) {
+                throw e // cancelamento normal da coroutine (ex.: tela fechada) não é erro
+            } catch (e: Exception) {
+                Log.e(TAG, "Erro ao salvar", e)
+                message = FormMessage("Não foi possível salvar. Tente novamente.", true)
             }
         }
     }
 
     fun delete(product: Product) {
         viewModelScope.launch {
-            service.remove(product)
-            message = FormMessage("Produto \"${product.name}\" removido.", false)
+            try {
+                service.remove(product)
+                message = FormMessage("Produto \"${product.name}\" removido.", false)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Erro ao remover", e)
+                message = FormMessage("Não foi possível remover. Tente novamente.", true)
+            }
         }
     }
 
     companion object {
+        private const val TAG = "EasyShop"
+
         val Factory = viewModelFactory {
             initializer { ProductViewModel((this[APPLICATION_KEY] as EasyShopApp).productService) }
         }

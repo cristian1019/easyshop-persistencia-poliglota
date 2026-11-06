@@ -9,8 +9,18 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 
-/** Repositório NoSQL: única porta de acesso da aplicação à coleção de produtos. */
-class ProductRepository(store: BoxStore) {
+/**
+ * Repositório NoSQL: única porta de acesso da aplicação à coleção de produtos.
+ * É uma interface para que a camada de negócio possa ser testada com um repositório falso.
+ */
+interface ProductRepository {
+    fun observeAll(): Flow<List<Product>>
+    suspend fun insert(product: Product): Long
+    suspend fun delete(id: Long): Boolean
+}
+
+/** Implementação real, sobre o ObjectBox. */
+class ObjectBoxProductRepository(store: BoxStore) : ProductRepository {
 
     private val box = store.boxFor(Product::class.java)
 
@@ -19,7 +29,7 @@ class ProductRepository(store: BoxStore) {
      * A leitura inicial é feita explicitamente com find(); a assinatura do ObjectBox
      * fica responsável apenas pelas mudanças posteriores.
      */
-    fun observeAll(): Flow<List<Product>> = callbackFlow {
+    override fun observeAll(): Flow<List<Product>> = callbackFlow {
         val query = box.query().order(Product_.name).build()
         val subscription = query.subscribe()
             .onlyChanges()
@@ -37,9 +47,9 @@ class ProductRepository(store: BoxStore) {
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun insert(product: Product): Long = withContext(Dispatchers.IO) { box.put(product) }
+    override suspend fun insert(product: Product): Long = withContext(Dispatchers.IO) { box.put(product) }
 
-    suspend fun delete(id: Long): Boolean = withContext(Dispatchers.IO) { box.remove(id) }
+    override suspend fun delete(id: Long): Boolean = withContext(Dispatchers.IO) { box.remove(id) }
 
     private companion object {
         const val TAG = "EasyShop"

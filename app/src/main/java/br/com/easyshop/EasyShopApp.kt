@@ -2,9 +2,9 @@ package br.com.easyshop
 
 import android.app.Application
 import br.com.easyshop.data.nosql.ObjectBoxProvider
-import br.com.easyshop.data.nosql.ProductRepository
+import br.com.easyshop.data.nosql.ObjectBoxProductRepository
 import br.com.easyshop.data.sql.AppDatabase
-import br.com.easyshop.data.sql.CustomerRepository
+import br.com.easyshop.data.sql.RoomCustomerRepository
 import br.com.easyshop.domain.CustomerService
 import br.com.easyshop.domain.ProductService
 
@@ -26,10 +26,10 @@ class EasyShopApp : Application() {
 
         // Persistência NoSQL
         val boxStore = ObjectBoxProvider.create(this)
-        productService = ProductService(ProductRepository(boxStore))
+        productService = ProductService(ObjectBoxProductRepository(boxStore))
 
         // Persistência SQL
         val sqlDatabase = AppDatabase.create(this)
-        customerService = CustomerService(CustomerRepository(sqlDatabase.customerDao()))
+        customerService = CustomerService(RoomCustomerRepository(sqlDatabase.customerDao()))
     }
 }

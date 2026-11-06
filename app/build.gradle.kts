@@ -64,4 +64,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.7.2")
 
     // Banco NoSQL: ObjectBox — dependências adicionadas automaticamente pelo plugin io.objectbox
+
+    // Testes unitários (JVM) das regras de negócio
+    testImplementation("junit:junit:4.13.2")
 }

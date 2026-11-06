@@ -135,7 +135,7 @@ O schema relacional gerado fica versionado em [`app/schemas/`](app/schemas/).
 ### Pelo Android Studio
 1. Clone o repositório:
    ```bash
-   git clone <URL-DO-REPOSITORIO>
+   git clone https://github.com/cristian1019/easyshop-persistencia-poliglota.git
    ```
 2. No Android Studio: **File → Open** e selecione a pasta do projeto.
 3. Aguarde o *Gradle Sync* (as dependências são baixadas automaticamente).
