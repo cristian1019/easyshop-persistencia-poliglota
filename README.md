@@ -9,13 +9,13 @@ Protótipo de mini e-commerce Android que usa **dois bancos de dados locais ao m
 
 ## 👥 Integrantes
 
-- NOME COMPLETO DO INTEGRANTE 1
-- NOME COMPLETO DO INTEGRANTE 2
-- NOME COMPLETO DO INTEGRANTE 3 *(se for trio)*
+- Cristian Henrique Souza Jeronimo
+- Samid Giraldello
+- Felipe Lima Pio
 
 ## 🎥 Vídeo de demonstração
 
-LINK DO VÍDEO (YouTube ou Google Drive)
+https://drive.google.com/file/d/1JmKI2-2FKlgqPKyfFmiOyXnkSBnkeBH6/view?usp=sharing
 
 ---
 
