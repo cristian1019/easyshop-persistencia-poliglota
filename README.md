@@ -128,7 +128,7 @@ O schema relacional gerado fica versionado em [`app/schemas/`](app/schemas/).
 ## ▶️ Como executar
 
 ### Pré-requisitos
-- **Android Studio** recente (testado com o JDK embutido, JBR 25).
+- **Android Studio** recente, usando o JDK embutido dele (testado com o **JBR 21**). Em **Settings → Build Tools → Gradle**, o Gradle JDK precisa ser um JDK completo: um JRE sem `jlink` (como o que vem na extensão Java do VS Code) faz a compilação falhar.
 - Android SDK Platform 36 instalado.
 - Um emulador Android (ex.: Pixel 7) ou um dispositivo físico com depuração USB.
 
@@ -152,12 +152,28 @@ Com um emulador aberto, o comando compila e instala o app *EasyShop*.
 
 > **Dica (Windows):** prefira clonar o projeto em um caminho **sem acentos e fora do OneDrive** (ex.: `C:\dev\easyshop`). O OneDrive pode bloquear arquivos gerados em `build/` durante a compilação. Se isso acontecer, apague a pasta `app/build` e compile de novo. O projeto já inclui `android.overridePathCheck=true` para aceitar caminhos com acentos, como "Área de Trabalho".
 
-## 🧪 Roteiro sugerido para a demonstração
+## 🧪 Testes unitários
 
-1. **Produtos:** cadastrar uma *Camiseta* (R$ 49,90, categoria Vestuário) com atributos `cor = azul` e `tamanho = M`.
-2. Cadastrar um *Notebook* (R$ 3.999,00, categoria Informática) com atributos **diferentes**: `processador = i7`, `ram = 16 GB`, `voltagem = bivolt`.
+As regras de negócio da camada `domain/` são testadas com JUnit, sem banco de dados: os testes usam repositórios falsos em memória ([`FakeRepositories.kt`](app/src/test/java/br/com/easyshop/domain/FakeRepositories.kt)). São 16 testes:
+
+- **`ProductServiceTest`** (10): preço no formato brasileiro (`3.999,00`, `R$ 1.500`, `19,90`), preço inválido ou zero, nome obrigatório e atributos dinâmicos.
+- **`CustomerServiceTest`** (6): nome com sobrenome, formato de e-mail, e-mail duplicado (inclusive com maiúsculas) e normalização de nome e e-mail.
+
+```bash
+# Windows
+gradlew.bat test
+# Linux/macOS
+./gradlew test
+```
+
+## 🎬 Roteiro da demonstração (vídeo)
+
+1. **Produtos:** cadastrar uma *Camiseta Polo* (R$ 49,90, categoria Roupas) com atributos `cor = azul` e `tamanho = M`.
+2. Cadastrar um *Notebook* (R$ 3.999,00, categoria Tecnologia) com atributos **diferentes**: `processador = Ryzen 5`, `RAM = 16 GB`, `voltagem = bivolt`.
 3. Mostrar que os dois documentos convivem na mesma coleção NoSQL, cada um com sua estrutura.
-4. **Clientes:** tentar salvar com e-mail inválido → erro de validação.
-5. Cadastrar *Maria Silva / maria@email.com* → aparece na lista com o id (PK).
-6. Tentar cadastrar outro cliente com `MARIA@email.com` → bloqueado (e-mail único).
-7. Fechar e reabrir o app → produtos e clientes continuam salvos (persistência local nos dois bancos).
+4. **Clientes:** cadastrar *Maria da Silva / maria.silva@email.com* → aparece na lista com o id (PK).
+5. Tentar salvar só com o nome *Maria* → "Informe nome e sobrenome."
+6. Tentar salvar com e-mail sem domínio → "E-mail inválido."
+7. Tentar cadastrar outro cliente com `MARIA.SILVA@email.com` → bloqueado (e-mail único).
+8. **Produtos:** tentar salvar com preço `abc` → "Preço inválido."; com preço `0` → "O preço deve ser maior que zero."
+9. Excluir um produto da lista.
